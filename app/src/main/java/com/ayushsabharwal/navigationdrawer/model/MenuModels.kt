@@ -5,6 +5,8 @@ data class NavigationResponse(
 )
 
 data class Result(
+    val title: String,
+    val user_photo: String,
     val menus: List<MenuItemModel>
 )
 

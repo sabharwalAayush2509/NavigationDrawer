@@ -14,13 +14,21 @@ import com.ayushsabharwal.navigationdrawer.model.MenuItemModel
 import com.bumptech.glide.Glide
 
 sealed class DrawerItem {
-    object Profile : DrawerItem()
+    data class Profile(val title: String, val userPhoto: String) : DrawerItem()
     data class Header(val title: String) : DrawerItem()
     data class App(val item: MenuItemModel) : DrawerItem()
     object SeeMore : DrawerItem()
 }
 
 class DrawerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private var userName = ""
+    private var userPhoto = ""
+
+    fun setProfile(name: String, photo: String) {
+        userName = name
+        userPhoto = photo
+    }
 
     companion object {
         private const val TYPE_PROFILE = 0
@@ -37,7 +45,12 @@ class DrawerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         items.clear()
         expanded = false
 
-        items.add(DrawerItem.Profile)
+        items.add(
+            DrawerItem.Profile(
+                title = userName,
+                userPhoto = userPhoto
+            )
+        )
 
         val topMenus = mutableListOf<MenuItemModel>()
         val appsMenus = mutableListOf<MenuItemModel>()
@@ -122,8 +135,8 @@ class DrawerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
             is DrawerItem.Profile -> {
                 val binding = (holder as ProfileVH).binding
-                binding.ivProfile.setImageResource(R.mipmap.ic_launcher)
-                binding.tvName.text = "Ayush Sambarwal"
+                Glide.with(binding.root).load(item.userPhoto).circleCrop().into(binding.ivProfile)
+                binding.tvName.text = item.title
             }
 
             is DrawerItem.Header -> {

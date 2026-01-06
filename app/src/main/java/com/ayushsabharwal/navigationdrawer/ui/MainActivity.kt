@@ -54,8 +54,12 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.layoutManager = layoutManager
         binding.recyclerView.adapter = adapter
 
-        viewModel.menus.observe(this) {
-            adapter.setMenus(it)
+        viewModel.navigationResponse.observe(this) { response ->
+            adapter.setProfile(
+                response.result.title,
+                response.result.user_photo
+            )
+            adapter.setMenus(response.result.menus)
         }
 
         viewModel.loadMenus()
