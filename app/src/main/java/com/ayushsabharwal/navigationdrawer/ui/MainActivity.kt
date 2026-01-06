@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 return when (adapter.getItemViewType(position)) {
-                    0, 1, 3 -> 2
+                    0, 1, 3, 4, 5 -> 2
                     else -> 1
                 }
             }

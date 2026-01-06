@@ -9,7 +9,9 @@ import com.ayushsabharwal.navigationdrawer.R
 import com.ayushsabharwal.navigationdrawer.databinding.ItemAppBinding
 import com.ayushsabharwal.navigationdrawer.databinding.ItemHeaderBinding
 import com.ayushsabharwal.navigationdrawer.databinding.ItemProfileHeaderBinding
+import com.ayushsabharwal.navigationdrawer.databinding.ItemRateUsBinding
 import com.ayushsabharwal.navigationdrawer.databinding.ItemSeeMoreBinding
+import com.ayushsabharwal.navigationdrawer.databinding.ItemSignOutBinding
 import com.ayushsabharwal.navigationdrawer.model.MenuItemModel
 import com.bumptech.glide.Glide
 
@@ -18,6 +20,8 @@ sealed class DrawerItem {
     data class Header(val title: String) : DrawerItem()
     data class App(val item: MenuItemModel) : DrawerItem()
     object SeeMore : DrawerItem()
+    data class RateUs(val item: MenuItemModel) : DrawerItem()
+    data class SignOut(val item: MenuItemModel) : DrawerItem()
 }
 
 class DrawerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -35,6 +39,8 @@ class DrawerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         private const val TYPE_HEADER = 1
         private const val TYPE_APP = 2
         private const val TYPE_SEE_MORE = 3
+        private const val TYPE_RATE_US = 4
+        private const val TYPE_SIGN_OUT = 5
     }
 
     private val items = mutableListOf<DrawerItem>()
@@ -57,15 +63,23 @@ class DrawerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         val helpMenus = mutableListOf<MenuItemModel>()
 
         var currentSection = ""
+        var rateUsItem: MenuItemModel? = null
+        var signOutItem: MenuItemModel? = null
 
         menus.forEach { menu ->
             if (menu.type == 0) {
                 currentSection = menu.label
             } else {
-                when (currentSection) {
-                    "" -> topMenus.add(menu)
-                    "APPS" -> appsMenus.add(menu)
-                    "HELP & MORE" -> helpMenus.add(menu)
+                when (menu.label) {
+                    "Rate Us" -> rateUsItem = menu
+                    "Sign Out" -> signOutItem = menu
+                    else -> {
+                        when (currentSection) {
+                            "" -> topMenus.add(menu)
+                            "APPS" -> appsMenus.add(menu)
+                            "HELP & MORE" -> helpMenus.add(menu)
+                        }
+                    }
                 }
             }
         }
@@ -89,6 +103,14 @@ class DrawerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             items.add(DrawerItem.App(it))
         }
 
+        rateUsItem?.let {
+            items.add(DrawerItem.RateUs(it))
+        }
+
+        signOutItem?.let {
+            items.add(DrawerItem.SignOut(it))
+        }
+
         notifyDataSetChanged()
     }
 
@@ -97,6 +119,8 @@ class DrawerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         is DrawerItem.Header -> TYPE_HEADER
         is DrawerItem.App -> TYPE_APP
         is DrawerItem.SeeMore -> TYPE_SEE_MORE
+        is DrawerItem.RateUs -> TYPE_RATE_US
+        is DrawerItem.SignOut -> TYPE_SIGN_OUT
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
@@ -120,8 +144,20 @@ class DrawerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             )
         )
 
-        else -> SeeMoreVH(
+        TYPE_SEE_MORE -> SeeMoreVH(
             ItemSeeMoreBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            )
+        )
+
+        TYPE_RATE_US -> RateUsVH(
+            ItemRateUsBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            )
+        )
+
+        else -> SignOutVH(
+            ItemSignOutBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false
             )
         )
@@ -163,6 +199,18 @@ class DrawerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     notifyDataSetChanged()
                 }
             }
+
+            is DrawerItem.RateUs -> {
+                val binding = (holder as RateUsVH).binding
+                binding.rateUsText.text = item.item.label
+                Glide.with(binding.root).load(item.item.icon).into(binding.rateUsIcon)
+            }
+
+            is DrawerItem.SignOut -> {
+                val binding = (holder as SignOutVH).binding
+                binding.signOutText.text = item.item.label
+                Glide.with(binding.root).load(item.item.icon).into(binding.signOutIcon)
+            }
         }
     }
 
@@ -173,4 +221,8 @@ class DrawerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     class AppVH(val binding: ItemAppBinding) : RecyclerView.ViewHolder(binding.root)
 
     class SeeMoreVH(val binding: ItemSeeMoreBinding) : RecyclerView.ViewHolder(binding.root)
+
+    class RateUsVH(val binding: ItemRateUsBinding) : RecyclerView.ViewHolder(binding.root)
+
+    class SignOutVH(val binding: ItemSignOutBinding) : RecyclerView.ViewHolder(binding.root)
 }
